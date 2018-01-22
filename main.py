@@ -1,5 +1,13 @@
 from time import sleep
 from gpiozero import Motor, Button, PWMLED
+import pygame
+import random
+
+#Setup audio
+pygame.mixer.pre_init(22050, -8, 2, 512)
+pygame.mixer.init()
+moveMusic = "music/movement.ogg"
+clawMusic = "music/clawLonger.ogg"
 
 #Define motors
 fbM = Motor(17,27)
@@ -16,7 +24,27 @@ rBut = Button(13)
 #Define Coin Mech
 #coinI = Button()
 #Define Magnet
-clawMagnet = PWMLED(18,frequency=100)
+clawMagnet = PWMLED(18,frequency=700)
+
+#Rigging Calculations
+
+averageCostPerPrize = 1 #In GBP
+costPerGo = 0.2 #In GBP
+currentWins = 0 #Start at 0 and add
+currentPlays = 0 # Start at 0 and add one per each play
+profitRequired = 1 #Percentage/100 required, usually 2 (double) is fine
+winRatio = (averageCostPerPrize*profitRequired)/costPerGo
+print("Win Ratio is 1 in every "+str(winRatio))
+
+def calculateStrength():
+    global currentPlays
+    winPercentage = (currentPlays*winRatio)/100
+    print(winPercentage)
+    percentage = random.uniform(0.4,winPercentage)
+    print(percentage)
+    currentPlays +=1
+    return 0.8
+
 def returnToHome():
     lrStop.when_pressed = lrM.stop
     fbStop.when_pressed = fbM.stop
@@ -31,6 +59,8 @@ def returnToHome():
     clawMagnet.off()
 
 def grabProcedure(strength):
+    pygame.mixer.music.load(clawMusic)
+    pygame.mixer.music.play(-1)
     #Procedure for grabbing the item.
     udM.backward()
     cT = 0
@@ -40,8 +70,11 @@ def grabProcedure(strength):
         cT = cT+1
     udM.stop()
     #grab
+    pygame.mixer.music.rewind()
     clawMagnet.value = strength
     udM.forward()
+    sleep(5)
+    clawMagnet.value = random.uniform(strength-0.1,strength)
     uStop.wait_for_press()
     udM.stop()
 
@@ -58,7 +91,7 @@ def initProcedure():
     udM.stop()
     #Blink claw
     i = 0
-    while(i<10):
+    while(i<4):
         clawMagnet.toggle()
         sleep(0.3)
         i = i +1
@@ -69,3 +102,22 @@ def initProcedure():
     udM.stop()
     #Home LR
     returnToHome()
+
+
+initProcedure()
+while True:
+    print("Press enter to start test")
+    input()
+    pygame.mixer.music.load(moveMusic)
+    pygame.mixer.music.play()
+    lrM.forward()
+    sleep(random.uniform(0, 4))
+    lrM.stop()
+    fbM.forward()
+    sleep(random.uniform(0, 4))
+    fbM.stop()
+    grabProcedure(calculateStrength())
+    pygame.mixer.music.load(moveMusic)
+    pygame.mixer.music.play()
+    returnToHome()
+    pygame.mixer.music.stop()
