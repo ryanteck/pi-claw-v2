@@ -28,22 +28,23 @@ clawMagnet = PWMLED(18,frequency=700)
 
 #Rigging Calculations
 
-averageCostPerPrize = 1 #In GBP
-costPerGo = 0.2 #In GBP
-currentWins = 0 #Start at 0 and add
-currentPlays = 0 # Start at 0 and add one per each play
-profitRequired = 1 #Percentage/100 required, usually 2 (double) is fine
-winRatio = (averageCostPerPrize*profitRequired)/costPerGo
-print("Win Ratio is 1 in every "+str(winRatio))
-
+#averageCostPerPrize = 1 #In GBP
+#costPerGo = 0.2 #In GBP
+#currentWins = 0 #Start at 0 and add
+#currentPlays = 0 # Start at 0 and add one per each play
+#profitRequired = 1 #Percentage/100 required, usually 2 (double) is fine
+#winRatio = (averageCostPerPrize*profitRequired)/costPerGo
+#
+#def calculateStrength():
+#    global currentPlays
+#    winPercentage = (currentPlays*winRatio)/100
+#    print(winPercentage)
+#    percentage = random.uniform(0.4,winPercentage)
+#    print(percentage)
+#    currentPlays +=1
+#return 0.8
 def calculateStrength():
-    global currentPlays
-    winPercentage = (currentPlays*winRatio)/100
-    print(winPercentage)
-    percentage = random.uniform(0.4,winPercentage)
-    print(percentage)
-    currentPlays +=1
-    return 0.8
+    return random.uniform(0.2,0.8)
 
 def returnToHome():
     lrStop.when_pressed = lrM.stop
@@ -74,7 +75,7 @@ def grabProcedure(strength):
     clawMagnet.value = strength
     udM.forward()
     sleep(5)
-    clawMagnet.value = random.uniform(strength-0.1,strength)
+    clawMagnet.value = random.uniform(strength-0.15,strength)
     uStop.wait_for_press()
     udM.stop()
 
@@ -109,24 +110,26 @@ while True:
     print("Press enter to play")
     input()
     pygame.mixer.music.load(moveMusic)
-    pygame.mixer.music.play()
     rBut.wait_for_press()
+    pygame.mixer.music.play()
     lrM.forward()
     sleep(0.2)
-    print("Sleeped")
     while(rBut.is_pressed) and (lrStop.is_pressed==False):
         sleep(0.01)
-        print("Sleeping")
     lrM.stop()
     fBut.wait_for_press()
     fbM.forward()
     sleep(0.2)
     while(fBut.is_pressed) and (fbStop.is_pressed==False):
         sleep(0.01)
-        print("Sleeping")
     fbM.stop()
-    grabProcedure(calculateStrength())
+    strength = calculateStrength()
+    grabProcedure(strength)
     pygame.mixer.music.load(moveMusic)
     pygame.mixer.music.play()
     returnToHome()
     pygame.mixer.music.stop()
+    print("Did user win or loose?")
+    winLoose = input()
+    print(input)
+    
