@@ -19,8 +19,8 @@ fbStop = Button(19)
 uStop = Button(26)
 dStop = Button(21)
 #Define FP Buttons
-fBut = Button(12)
-rBut = Button(13)
+fBut = Button(13)
+rBut = Button(12)
 #Define Coin Mech
 #coinI = Button()
 #Define Magnet
@@ -91,7 +91,7 @@ def initProcedure():
     udM.stop()
     #Blink claw
     i = 0
-    while(i<4):
+    while(i<3):
         clawMagnet.toggle()
         sleep(0.3)
         i = i +1
@@ -106,15 +106,24 @@ def initProcedure():
 
 initProcedure()
 while True:
-    print("Press enter to start test")
+    print("Press enter to play")
     input()
     pygame.mixer.music.load(moveMusic)
     pygame.mixer.music.play()
+    rBut.wait_for_press()
     lrM.forward()
-    sleep(random.uniform(0, 4))
+    sleep(0.2)
+    print("Sleeped")
+    while(rBut.is_pressed) and (lrStop.is_pressed==False):
+        sleep(0.01)
+        print("Sleeping")
     lrM.stop()
+    fBut.wait_for_press()
     fbM.forward()
-    sleep(random.uniform(0, 4))
+    sleep(0.2)
+    while(fBut.is_pressed) and (fbStop.is_pressed==False):
+        sleep(0.01)
+        print("Sleeping")
     fbM.stop()
     grabProcedure(calculateStrength())
     pygame.mixer.music.load(moveMusic)
