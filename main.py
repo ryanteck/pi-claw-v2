@@ -4,10 +4,10 @@ import pygame
 import random
 
 #Setup audio
-pygame.mixer.pre_init(22050, -8, 2, 512)
+pygame.mixer.pre_init(44100, -8, 2, 512)
 pygame.mixer.init()
-moveMusic = "music/movement.ogg"
-clawMusic = "music/clawLonger.ogg"
+moveMusic = "music/movement-m.ogg"
+clawMusic = "music/clawLonger-m.ogg"
 
 #Define motors
 fbM = Motor(17,27)
@@ -44,7 +44,7 @@ clawMagnet = PWMLED(18,frequency=700)
 #    currentPlays +=1
 #return 0.8
 def calculateStrength():
-    return random.uniform(0.2,0.8)
+    return random.uniform(0.4,0.8)
 
 def returnToHome():
     lrStop.when_pressed = lrM.stop
@@ -110,26 +110,22 @@ while True:
     print("Press enter to play")
     input()
     pygame.mixer.music.load(moveMusic)
-    rBut.wait_for_press()
-    pygame.mixer.music.play()
-    lrM.forward()
-    sleep(0.2)
-    while(rBut.is_pressed) and (lrStop.is_pressed==False):
-        sleep(0.01)
-    lrM.stop()
     fBut.wait_for_press()
+    pygame.mixer.music.play()
     fbM.forward()
     sleep(0.2)
     while(fBut.is_pressed) and (fbStop.is_pressed==False):
         sleep(0.01)
     fbM.stop()
+    rBut.wait_for_press()
+    lrM.forward()
+    sleep(0.2)
+    while(rBut.is_pressed) and (lrStop.is_pressed==False):
+        sleep(0.01)
+    lrM.stop()
     strength = calculateStrength()
     grabProcedure(strength)
     pygame.mixer.music.load(moveMusic)
     pygame.mixer.music.play()
     returnToHome()
     pygame.mixer.music.stop()
-    print("Did user win or loose?")
-    winLoose = input()
-    print(input)
-    
