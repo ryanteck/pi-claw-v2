@@ -1,12 +1,12 @@
 from time import sleep
-from gpiozero import Motor, Button, PWMLED
+from gpiozero import Motor, Button, PWMLED, LED
 import pygame
 import random
 
 #Setup audio
 pygame.mixer.pre_init(44100, -8, 2, 512)
 pygame.mixer.init()
-moveMusic = "music/movement-m.ogg"
+moveMusic = ["music/movement-1.ogg","music/movement-2.ogg","music/movement-3.ogg"]
 clawMusic = "music/clawLonger-m.ogg"
 
 #Define motors
@@ -21,10 +21,13 @@ dStop = Button(21)
 #Define FP Buttons
 fBut = Button(13)
 rBut = Button(12)
+#Define FP Button Lights
+fBl = LED(6)
+rBl = LED(5)
 #Define Coin Mech
 #coinI = Button()
 #Define Magnet
-clawMagnet = PWMLED(18,frequency=700)
+clawMagnet = PWMLED(18,frequency=200)
 
 #Rigging Calculations
 
@@ -51,6 +54,7 @@ def returnToHome():
     fbStop.when_pressed = fbM.stop
     lrM.backward()
     fbM.backward()
+    sleep(0.3)
     while(lrStop.value==False or fbStop.value==False):
         pass
     lrM.stop() #Sometimes even though this should have been run it doesn't.
@@ -71,11 +75,11 @@ def grabProcedure(strength):
         cT = cT+1
     udM.stop()
     #grab
-    pygame.mixer.music.rewind()
+    #pygame.mixer.music.rewind()
     clawMagnet.value = strength
     udM.forward()
     sleep(5)
-    clawMagnet.value = random.uniform(strength-0.15,strength)
+    clawMagnet.value = random.uniform(strength-0.05,strength)
     uStop.wait_for_press()
     udM.stop()
 
@@ -92,7 +96,7 @@ def initProcedure():
     udM.stop()
     #Blink claw
     i = 0
-    while(i<3):
+    while(i<2):
         clawMagnet.toggle()
         sleep(0.3)
         i = i +1
@@ -106,10 +110,11 @@ def initProcedure():
 
 
 initProcedure()
+musicNo = 0
 while True:
-    print("Press enter to play")
-    input()
-    pygame.mixer.music.load(moveMusic)
+    pygame.mixer.music.load(moveMusic[musicNo])
+    fBl.on()
+    rBl.on()
     fBut.wait_for_press()
     pygame.mixer.music.play()
     fbM.forward()
@@ -117,15 +122,20 @@ while True:
     while(fBut.is_pressed) and (fbStop.is_pressed==False):
         sleep(0.01)
     fbM.stop()
+    fBl.off()
     rBut.wait_for_press()
     lrM.forward()
     sleep(0.2)
     while(rBut.is_pressed) and (lrStop.is_pressed==False):
         sleep(0.01)
     lrM.stop()
+    rBl.off()
     strength = calculateStrength()
     grabProcedure(strength)
-    pygame.mixer.music.load(moveMusic)
+    pygame.mixer.music.load(moveMusic[musicNo])
     pygame.mixer.music.play()
     returnToHome()
     pygame.mixer.music.stop()
+    musicNo+=1
+    if(musicNo>2):
+        musicNo=0
